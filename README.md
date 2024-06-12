@@ -1,3 +1,7 @@
+This is a fork with code changes made to fix the plugin not working on Windows. See the Releases in this fork for a Windows VST3 binary.
+
+Original README:
+
 # ABComparisonPlugin
 The ABComparison is a simple channel routing plug-in for AB-comparison tests. 
 
