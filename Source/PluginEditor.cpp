@@ -24,7 +24,7 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (AbcomparisonAudioProcessor& p, AudioProcessorValueTreeState& vts)
+AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (AbcomparisonAudioProcessor& p, juce::AudioProcessorValueTreeState& vts)
 : AudioProcessorEditor (&p), processor (p), parameters (vts)
 {
     toolTipWin.setMillisecondsBeforeTipAppears (200);
@@ -33,12 +33,12 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
     addKeyListener (this);
 
     // create a set of colours
-    Array<Colour> cols;
-    cols.add (Colours::limegreen);
-    cols.add (Colours::orange);
-    cols.add (Colours::orangered);
-    cols.add (Colours::slateblue);
-    cols.add (Colours::magenta);
+    juce::Array<juce::Colour> cols;
+    cols.add (juce::Colours::limegreen);
+    cols.add (juce::Colours::orange);
+    cols.add (juce::Colours::orangered);
+    cols.add (juce::Colours::slateblue);
+    cols.add (juce::Colours::magenta);
 
     addAndMakeVisible (cbSwitchMode);
     cbSwitchMode.addItem ("Exclusive Solo", 1);
@@ -46,17 +46,17 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
     cbSwitchModeAttachment.reset (new ComboBoxAttachment (parameters, "switchMode", cbSwitchMode));
 
     addAndMakeVisible (cbNChoices);
-    cbNChoices.setJustificationType (Justification::centred);
+    cbNChoices.setJustificationType (juce::Justification::centred);
     for (int i = 2; i <= processor.maxNChoices; ++i)
-        cbNChoices.addItem (String (i), i - 1);
+        cbNChoices.addItem (juce::String (i), i - 1);
 
     cbNChoicesAttachment.reset (new ComboBoxAttachment (parameters, "numberOfChoices", cbNChoices));
 
     addAndMakeVisible (cbChannelSize);
-    cbChannelSize.setJustificationType (Justification::centred);
+    cbChannelSize.setJustificationType (juce::Justification::centred);
 
     for (int i = 1; i <= 32; ++i)
-        cbChannelSize.addItem (String (i) + " ch", i);
+        cbChannelSize.addItem (juce::String (i) + " ch", i);
 
     cbChannelSizeAttachment.reset (new ComboBoxAttachment (parameters, "channelSize", cbChannelSize));
 
@@ -64,7 +64,7 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
     addAndMakeVisible (slFadeTime);
     slFadeTimeAttachment.reset (new SliderAttachment (parameters, "fadeTime", slFadeTime));
     slFadeTime.setTooltip ("Cross-fade time (in ms)");
-    slFadeTime.setTextBoxStyle (Slider::TextBoxBelow, false, 80, 20);
+    slFadeTime.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 80, 20);
     slFadeTime.setTextValueSuffix (" ms");
 
     addAndMakeVisible (tbEditLabels);
@@ -74,7 +74,7 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
     addAndMakeVisible (tbEnableOSC);
     tbEnableOSC.setButtonText ("");
     tbEnableOSC.setTooltip ("Enables/disables OSC");
-    tbEnableOSC.setToggleState (p.getOSCReceiver().getAutoConnect(), dontSendNotification);
+    tbEnableOSC.setToggleState (p.getOSCReceiver().getAutoConnect(), juce::dontSendNotification);
     tbEnableOSC.onClick = [&] ()
     {
         const auto enable = tbEnableOSC.getToggleState();
@@ -88,26 +88,26 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
     teOSCPort.setReturnKeyStartsNewLine (false);
     teOSCPort.setReadOnly (false);
     teOSCPort.setScrollbarsShown (true);
-    teOSCPort.setJustification (Justification::centred);
+    teOSCPort.setJustification (juce::Justification::centred);
     teOSCPort.setTooltip ("The OSC port for receiving switch command. The command should be '/switch i', with i being the choice you want to play.");
-    teOSCPort.setText (String (p.getOSCReceiver().getPortNumber()), dontSendNotification);
+    teOSCPort.setText (juce::String (p.getOSCReceiver().getPortNumber()), juce::dontSendNotification);
     teOSCPort.onReturnKey = [&] ()
     {
         const int currentPort = teOSCPort.getText().getIntValue();
         p.getOSCReceiver().setPort (currentPort);
     };
 
-    flexBox.flexWrap = FlexBox::Wrap::wrap;
-    flexBox.alignContent = FlexBox::AlignContent::flexStart;
+    flexBox.flexWrap = juce::FlexBox::Wrap::wrap;
+    flexBox.alignContent = juce::FlexBox::AlignContent::flexStart;
 
     for (int choice = 0; choice < processor.maxNChoices; ++choice)
     {
-        auto handle = tbChoice.add (new TextButton);
+        auto handle = tbChoice.add (new juce::TextButton);
         addAndMakeVisible (handle);
 
-        tbChoiceAttachments.add (new ButtonAttachment (parameters, "choiceState" + String (choice), *handle));
+        tbChoiceAttachments.add (new ButtonAttachment (parameters, "choiceState" + juce::String (choice), *handle));
         handle->setClickingTogglesState (true);
-        handle->setColour (TextButton::buttonOnColourId, cols[choice % cols.size()]);
+        handle->setColour (juce::TextButton::buttonOnColourId, cols[choice % cols.size()]);
     }
 
     updateNumberOfButtons();
@@ -115,9 +115,9 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
 
     // set the size of the GUI so the number of choices (nChoices) will fit in there
     {
-        ScopedValueSetter<bool> preventEditorFromCallingProcessor (editorIsResizing, true, false);
+        juce::ScopedValueSetter<bool> preventEditorFromCallingProcessor (editorIsResizing, true, false);
         setResizeLimits (460, 300, 1440, 700);
-        setSize (jmin (processor.editorWidth.load(), 1440), jmin (processor.editorHeight.load(), 700));
+        setSize (juce::jmin (processor.editorWidth.load(), 1440), juce::jmin (processor.editorHeight.load(), 700));
     }
 
     updateLabelText();
@@ -132,14 +132,14 @@ AbcomparisonAudioProcessorEditor::~AbcomparisonAudioProcessorEditor()
 }
 
 //==============================================================================
-void AbcomparisonAudioProcessorEditor::paint (Graphics& g)
+void AbcomparisonAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 
-    const String title = "ABComparison";
+    const juce::String title = "ABComparison";
 
-    Font font = Font (30.0f);
+    juce::Font font = juce::Font (30.0f);
     const float titleWidth = font.getStringWidth (title);
 
     auto bounds = getLocalBounds();
@@ -147,32 +147,32 @@ void AbcomparisonAudioProcessorEditor::paint (Graphics& g)
     auto titleRow = bounds.removeFromTop (40);
 
     g.setFont (font);
-    g.setColour (Colours::white);
-    g.drawFittedText (title, titleRow, Justification::centredTop, 1);
+    g.setColour (juce::Colours::white);
+    g.drawFittedText (title, titleRow, juce::Justification::centredTop, 1);
 
     const float reduceAmount = 0.5f * (titleRow.getWidth() + titleWidth);
     titleRow.removeFromLeft (static_cast<int> (ceil (reduceAmount)));
 
-    String versionString = "v";
+    juce::String versionString = "v";
     versionString.append (JucePlugin_VersionString, 6);
 
     g.setFont (12.0f);
-    g.drawFittedText (versionString, titleRow, Justification::topLeft, 1);
+    g.drawFittedText (versionString, titleRow, juce::Justification::topLeft, 1);
 
     auto headlineRow = bounds.removeFromTop (14);
     headlineRow.removeFromLeft (15);
 
     g.setFont (14.0f);
-    g.drawText ("Choices", headlineRow.removeFromLeft (65), Justification::centred, 1);
-    g.drawText (CharPointer_UTF8 ("\xc3\xa0"), headlineRow.removeFromLeft (10), Justification::centred, 1);
-    g.drawText ("Channels", headlineRow.removeFromLeft (75), Justification::centred, 1);
+    g.drawText ("Choices", headlineRow.removeFromLeft (65), juce::Justification::centred, 1);
+    g.drawText (juce::CharPointer_UTF8 ("\xc3\xa0"), headlineRow.removeFromLeft (10), juce::Justification::centred, 1);
+    g.drawText ("Channels", headlineRow.removeFromLeft (75), juce::Justification::centred, 1);
     headlineRow.removeFromLeft (10);
-    g.drawText ("Switch mode", headlineRow.removeFromLeft (110), Justification::centred, 1);
+    g.drawText ("Switch mode", headlineRow.removeFromLeft (110), juce::Justification::centred, 1);
     headlineRow.removeFromLeft (7);
-    g.drawText ("FadeTime", headlineRow.removeFromLeft (120), Justification::centred, 1);
+    g.drawText ("FadeTime", headlineRow.removeFromLeft (120), juce::Justification::centred, 1);
     headlineRow.removeFromLeft (7 + 75 + 10);
-    g.drawText ("OSC", headlineRow.removeFromLeft (26), Justification::left, 1);
-    g.drawText ("Port", headlineRow.removeFromLeft (70), Justification::centred, 1);
+    g.drawText ("OSC", headlineRow.removeFromLeft (26), juce::Justification::left, 1);
+    g.drawText ("Port", headlineRow.removeFromLeft (70), juce::Justification::centred, 1);
 }
 
 void AbcomparisonAudioProcessorEditor::resized()
@@ -205,12 +205,12 @@ void AbcomparisonAudioProcessorEditor::resized()
         processor.setEditorSize (getWidth(), getHeight());
 }
 
-bool AbcomparisonAudioProcessorEditor::keyPressed (const KeyPress &key, Component *originatingComponent)
+bool AbcomparisonAudioProcessorEditor::keyPressed (const juce::KeyPress &key, Component *originatingComponent)
 {
     auto choice = key.getKeyCode() - 49;
     if (choice == - 1)
         choice = 9;
-    if (choice >= 0 && choice < jmin (nChoices, 10))
+    if (choice >= 0 && choice < juce::jmin (nChoices, 10))
         tbChoice.getUnchecked (choice)->triggerClick();
     return true;
 }
@@ -224,7 +224,7 @@ void AbcomparisonAudioProcessorEditor::updateNumberOfButtons()
     for (int choice = 0; choice < nChoices; ++choice)
     {
         tbChoice.getUnchecked (choice)->setVisible (true);
-        flexBox.items.add (FlexItem (size, size, *tbChoice.getUnchecked (choice)).withMargin ({10, 10, 10, 10}));
+        flexBox.items.add (juce::FlexItem (size, size, *tbChoice.getUnchecked (choice)).withMargin ({10, 10, 10, 10}));
     }
 
     for (int choice = nChoices; choice < processor.maxNChoices; ++choice)
@@ -240,7 +240,7 @@ void AbcomparisonAudioProcessorEditor::timerCallback()
 
     if (processor.resizeEditorWindow.exchange (false))
     {
-        ScopedValueSetter<bool> preventEditorFromCallingProcessor (editorIsResizing, true, false);
+        juce::ScopedValueSetter<bool> preventEditorFromCallingProcessor (editorIsResizing, true, false);
         setSize (processor.editorWidth.load(), processor.editorHeight.load());
     }
 
@@ -257,17 +257,17 @@ void AbcomparisonAudioProcessorEditor::timerCallback()
         updateButtonSize();
 }
 
-void AbcomparisonAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster *source)
+void AbcomparisonAudioProcessorEditor::changeListenerCallback (juce::ChangeBroadcaster *source)
 {
     if (processor.getOSCReceiver().getAutoConnect())
     {
         if (processor.getOSCReceiver().isConnected())
-            teOSCPort.setColour (TextEditor::outlineColourId, Colours::green);
+            teOSCPort.setColour (juce::TextEditor::outlineColourId, juce::Colours::green);
         else
-            teOSCPort.setColour (TextEditor::outlineColourId, Colours::red);
+            teOSCPort.setColour (juce::TextEditor::outlineColourId, juce::Colours::red);
     }
     else
-        teOSCPort.setColour (TextEditor::outlineColourId, getLookAndFeel().findColour (TextEditor::outlineColourId));
+        teOSCPort.setColour (juce::TextEditor::outlineColourId, getLookAndFeel().findColour (juce::TextEditor::outlineColourId));
 
     teOSCPort.repaint();
 }
@@ -278,21 +278,21 @@ void AbcomparisonAudioProcessorEditor::editLabels()
     auto settings = std::make_unique<SettingsComponent> (processor);
     settings->setSize (300, 250);
 
-    CallOutBox::launchAsynchronously (std::move (settings), tbEditLabels.getScreenBounds(), nullptr);
+    juce::CallOutBox::launchAsynchronously (std::move (settings), tbEditLabels.getScreenBounds(), nullptr);
 }
 
 void AbcomparisonAudioProcessorEditor::updateLabelText()
 {
-    auto labels = StringArray::fromLines (processor.getLabelText());
+    auto labels = juce::StringArray::fromLines (processor.getLabelText());
 
     const int nButtons = tbChoice.size();
 
     int i = 0;
-    for (; i < jmin (labels.size(), nButtons); ++i)
+    for (; i < juce::jmin (labels.size(), nButtons); ++i)
         tbChoice[i]->setButtonText (labels[i]);
 
     for (; i < nButtons; ++i)
-        tbChoice[i]->setButtonText (String (i + 1));
+        tbChoice[i]->setButtonText (juce::String (i + 1));
 }
 
 void AbcomparisonAudioProcessorEditor::updateButtonSize()

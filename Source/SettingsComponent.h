@@ -27,7 +27,7 @@
 //==============================================================================
 /*
 */
-class SettingsComponent : public Component
+class SettingsComponent : public juce::Component
 {
 public:
     SettingsComponent (AbcomparisonAudioProcessor& p) : processor (p)
@@ -48,7 +48,7 @@ public:
     {
     }
 
-    void paint (Graphics& g) override
+    void paint (juce::Graphics& g) override
     {
     }
 
@@ -78,8 +78,8 @@ public:
 private:
     AbcomparisonAudioProcessor& processor;
 
-    TextEditor editor;
-    Slider size;
+    juce::TextEditor editor;
+    juce::Slider size;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComponent)
 };

@@ -33,9 +33,9 @@
 /**
 */
 class AbcomparisonAudioProcessor :
-public AudioProcessor,
-private AudioProcessorValueTreeState::Listener,
-private OSCReceiver::ListenerWithOSCAddress<OSCReceiver::MessageLoopCallback>
+    public juce::AudioProcessor,
+    private juce::AudioProcessorValueTreeState::Listener,
+    private juce::OSCReceiver::ListenerWithOSCAddress<juce::OSCReceiver::MessageLoopCallback>
 {
     static const juce::Identifier EditorWidth;
     static const juce::Identifier EditorHeight;
@@ -60,14 +60,14 @@ public:
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
    #endif
 
-    void processBlock (AudioBuffer<float>&, MidiBuffer&) override;
+    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
     //==============================================================================
-    AudioProcessorEditor* createEditor() override;
+    juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
 
     //==============================================================================
-    const String getName() const override;
+    const juce::String getName() const override;
 
     bool acceptsMidi() const override;
     bool producesMidi() const override;
@@ -78,18 +78,18 @@ public:
     int getNumPrograms() override;
     int getCurrentProgram() override;
     void setCurrentProgram (int index) override;
-    const String getProgramName (int index) override;
-    void changeProgramName (int index, const String& newName) override;
+    const juce::String getProgramName (int index) override;
+    void changeProgramName (int index, const juce::String& newName) override;
 
     //==============================================================================
-    void getStateInformation (MemoryBlock& destData) override;
+    void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    void parameterChanged (const String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String &parameterID, float newValue) override;
     void muteAllOtherChoices (const int choiceNotToMute);
 
     //==============================================================================
-    void oscMessageReceived (const OSCMessage&) override;
+    void oscMessageReceived (const juce::OSCMessage&) override;
 
 
     // === public flag for editor, signaling to resize window
@@ -101,8 +101,8 @@ public:
     std::atomic<int> editorHeight = 300;
     std::atomic<bool> numberOfChoicesHasChanged = false;
 
-    void setLabelText (String labelText);
-    const String getLabelText() { return labelText; };
+    void setLabelText (juce::String labelText);
+    const juce::String getLabelText() { return labelText; };
 
     void setButtonSize (int newSize);
     const int getButtonSize() { return buttonSize.get(); };
@@ -110,9 +110,9 @@ public:
     OSCReceiverPlus& getOSCReceiver() noexcept { return oscReceiver; }
 
 private:
-    AudioProcessorValueTreeState parameters;
-    AudioProcessorValueTreeState::ParameterLayout createParameters();
-    LinearSmoothedValue<float> gains[maxNChoices];
+    juce::AudioProcessorValueTreeState parameters;
+    juce::AudioProcessorValueTreeState::ParameterLayout createParameters();
+    juce::LinearSmoothedValue<float> gains[maxNChoices];
 
     OSCReceiverPlus oscReceiver;
 
@@ -123,8 +123,8 @@ private:
 
     bool mutingOtherChoices = false;
 
-    String labelText = "";
-    Atomic<int> buttonSize = 120;
+    juce::String labelText = "";
+    juce::Atomic<int> buttonSize = 120;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AbcomparisonAudioProcessor)

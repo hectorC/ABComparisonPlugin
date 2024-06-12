@@ -26,63 +26,63 @@
 #include "PluginProcessor.h"
 #include "SettingsComponent.h"
 
-typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
-typedef AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
-typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
+typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
+typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
+typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
 //==============================================================================
 /**
 */
-class AbcomparisonAudioProcessorEditor  : public AudioProcessorEditor,
-    public KeyListener,
-    private Timer,
-    public ChangeListener
+class AbcomparisonAudioProcessorEditor  : public juce::AudioProcessorEditor,
+    public juce::KeyListener,
+    private juce::Timer,
+    public juce::ChangeListener
 {
 public:
-    AbcomparisonAudioProcessorEditor (AbcomparisonAudioProcessor&, AudioProcessorValueTreeState&);
+    AbcomparisonAudioProcessorEditor (AbcomparisonAudioProcessor&, juce::AudioProcessorValueTreeState&);
     ~AbcomparisonAudioProcessorEditor();
 
     //==============================================================================
-    void paint (Graphics&) override;
+    void paint (juce::Graphics&) override;
     void resized() override;
     void updateNumberOfButtons();
 
-    bool keyPressed (const KeyPress &key, Component *originatingComponent) override;
+    bool keyPressed (const juce::KeyPress &key, Component *originatingComponent) override;
     void timerCallback() override;
 
     void editLabels();
     void updateLabelText();
     void updateButtonSize();
 
-    void changeListenerCallback (ChangeBroadcaster *source) override;
+    void changeListenerCallback (juce::ChangeBroadcaster *source) override;
 
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     AbcomparisonAudioProcessor& processor;
-    AudioProcessorValueTreeState& parameters;
+    juce::AudioProcessorValueTreeState& parameters;
 
-    ComboBox cbSwitchMode;
-    ComboBox cbChannelSize;
-    ComboBox cbNChoices;
-    Slider slFadeTime;
-    ToggleButton tbEnableOSC;
-    TextEditor teOSCPort;
+    juce::ComboBox cbSwitchMode;
+    juce::ComboBox cbChannelSize;
+    juce::ComboBox cbNChoices;
+    juce::Slider slFadeTime;
+    juce::ToggleButton tbEnableOSC;
+    juce::TextEditor teOSCPort;
 
     int nChoices = 2;
 
     std::unique_ptr<ComboBoxAttachment> cbSwitchModeAttachment, cbChannelSizeAttachment, cbNChoicesAttachment;
     std::unique_ptr<SliderAttachment> slFadeTimeAttachment;
 
-    OwnedArray<TextButton> tbChoice;
-    OwnedArray<ButtonAttachment> tbChoiceAttachments;
+    juce::OwnedArray<juce::TextButton> tbChoice;
+    juce::OwnedArray<ButtonAttachment> tbChoiceAttachments;
 
-    TextButton tbEditLabels;
+    juce::TextButton tbEditLabels;
 
-    FlexBox flexBox;
-    Rectangle<int> flexBoxArea;
+    juce::FlexBox flexBox;
+    juce::Rectangle<int> flexBoxArea;
 
-    TooltipWindow toolTipWin;
+    juce::TooltipWindow toolTipWin;
 
     bool editorIsResizing = false;
 

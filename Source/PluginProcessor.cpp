@@ -36,9 +36,9 @@ AbcomparisonAudioProcessor::AbcomparisonAudioProcessor()
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  AudioChannelSet::discreteChannels (64), true)
+                       .withInput  ("Input",  juce::AudioChannelSet::discreteChannels (64), true)
                       #endif
-                       .withOutput ("Output", AudioChannelSet::discreteChannels (64), true)
+                       .withOutput ("Output", juce::AudioChannelSet::discreteChannels (64), true)
                      #endif
                        ),
 #endif
@@ -47,8 +47,8 @@ oscReceiver (9222)
 {
     for (int choice = 0; choice < maxNChoices; ++choice)
     {
-        parameters.addParameterListener ("choiceState" + String (choice), this);
-        choiceStates[choice] = parameters.getRawParameterValue ("choiceState" + String (choice));
+        parameters.addParameterListener ("choiceState" + juce::String (choice), this);
+        choiceStates[choice] = parameters.getRawParameterValue ("choiceState" + juce::String (choice));
     }
 
     parameters.addParameterListener ("numberOfChoices", this);
@@ -58,7 +58,7 @@ oscReceiver (9222)
     fadeTime = parameters.getRawParameterValue ("fadeTime");
     numberOfChoices = parameters.getRawParameterValue ("numberOfChoices");
 
-    oscReceiver.addListener (this, OSCAddress ("/switch"));
+    oscReceiver.addListener (this, juce::OSCAddress ("/switch"));
 }
 
 
@@ -67,7 +67,7 @@ AbcomparisonAudioProcessor::~AbcomparisonAudioProcessor()
 }
 
 //==============================================================================
-const String AbcomparisonAudioProcessor::getName() const
+const juce::String AbcomparisonAudioProcessor::getName() const
 {
     return JucePlugin_Name;
 }
@@ -119,12 +119,12 @@ void AbcomparisonAudioProcessor::setCurrentProgram (int index)
 {
 }
 
-const String AbcomparisonAudioProcessor::getProgramName (int index)
+const juce::String AbcomparisonAudioProcessor::getProgramName (int index)
 {
     return {};
 }
 
-void AbcomparisonAudioProcessor::changeProgramName (int index, const String& newName)
+void AbcomparisonAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
 }
 
@@ -151,16 +151,16 @@ bool AbcomparisonAudioProcessor::isBusesLayoutSupported (const BusesLayout& layo
 }
 #endif
 
-void AbcomparisonAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
+void AbcomparisonAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    ScopedNoDenormals noDenormals;
+    juce::ScopedNoDenormals noDenormals;
     auto nCh = buffer.getNumChannels();
     const int stride = *parameters.getRawParameterValue ("channelSize") + 1;
     auto nSamples = buffer.getNumSamples();
     // choice 0
     if (! gains[0].isSmoothing() && gains[0].getTargetValue() == 0.0f)
     {
-        for (int ch = 0; ch < jmin (nCh, stride); ++ch)
+        for (int ch = 0; ch < juce::jmin (nCh, stride); ++ch)
             buffer.clear (ch, 0, nSamples);
     }
     else
@@ -169,7 +169,7 @@ void AbcomparisonAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiB
         gains[0].skip (nSamples - 2);
         const float endGain = gains[0].getNextValue();
 
-        for (int ch = 0; ch < jmin (nCh, stride); ++ch)
+        for (int ch = 0; ch < juce::jmin (nCh, stride); ++ch)
             buffer.applyGainRamp (ch, 0, nSamples, startGain, endGain);
     }
 
@@ -205,28 +205,28 @@ bool AbcomparisonAudioProcessor::hasEditor() const
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-AudioProcessorEditor* AbcomparisonAudioProcessor::createEditor()
+juce::AudioProcessorEditor* AbcomparisonAudioProcessor::createEditor()
 {
     return new AbcomparisonAudioProcessorEditor (*this, parameters);
 }
 
 //==============================================================================
-void AbcomparisonAudioProcessor::getStateInformation (MemoryBlock& destData)
+void AbcomparisonAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = parameters.copyState();
     state.setProperty (OSCPort, oscReceiver.getPortNumber(), nullptr);
     state.setProperty (OSCEnabled, oscReceiver.getAutoConnect(), nullptr);
-    std::unique_ptr<XmlElement> xml (state.createXml());
+    std::unique_ptr<juce::XmlElement> xml (state.createXml());
     copyXmlToBinary (*xml, destData);
 }
 
 void AbcomparisonAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+    std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
     if (xmlState.get() != nullptr)
         if (xmlState->hasTagName (parameters.state.getType()))
         {
-            parameters.replaceState (ValueTree::fromXml (*xmlState));
+            parameters.replaceState (juce::ValueTree::fromXml (*xmlState));
             if (parameters.state.hasProperty (EditorWidth) && parameters.state.hasProperty (EditorHeight))
             {
                 editorWidth = parameters.state.getProperty (EditorWidth);
@@ -248,7 +248,7 @@ void AbcomparisonAudioProcessor::setStateInformation (const void* data, int size
         }
 }
 
-void AbcomparisonAudioProcessor::parameterChanged (const String &parameterID, float newValue)
+void AbcomparisonAudioProcessor::parameterChanged (const juce::String &parameterID, float newValue)
 {
     if (parameterID.startsWith ("choiceState"))
     {
@@ -258,7 +258,7 @@ void AbcomparisonAudioProcessor::parameterChanged (const String &parameterID, fl
         if (*switchMode < 0.5f && ! mutingOtherChoices) // exclusive solo
         {
             if (wasOnBefore)
-                parameters.getParameter ("choiceState" + String (choice))->setValueNotifyingHost (1.0f);
+                parameters.getParameter ("choiceState" + juce::String (choice))->setValueNotifyingHost (1.0f);
             else
                 muteAllOtherChoices (choice);
         }
@@ -277,15 +277,15 @@ void AbcomparisonAudioProcessor::parameterChanged (const String &parameterID, fl
 
 void AbcomparisonAudioProcessor::muteAllOtherChoices (const int choiceNotToMute)
 {
-    ScopedValueSetter<bool> muting (mutingOtherChoices, true);
+    juce::ScopedValueSetter<bool> muting (mutingOtherChoices, true);
 
     for (int i = 0; i < maxNChoices; ++i)
         if (i != choiceNotToMute)
-            parameters.getParameter ("choiceState" + String (i))->setValueNotifyingHost (0.0f);
+            parameters.getParameter ("choiceState" + juce::String (i))->setValueNotifyingHost (0.0f);
 }
 
 
-void AbcomparisonAudioProcessor::oscMessageReceived (const OSCMessage& msg)
+void AbcomparisonAudioProcessor::oscMessageReceived (const juce::OSCMessage& msg)
 {
     for (auto& arg : msg)
     {
@@ -301,7 +301,7 @@ void AbcomparisonAudioProcessor::oscMessageReceived (const OSCMessage& msg)
         
         if (choice >= 0 && choice < maxNChoices)
         {
-            auto param = parameters.getParameter ("choiceState" + String (choice));
+            auto param = parameters.getParameter ("choiceState" + juce::String (choice));
             
             if (param->getValue() > 0.5f)
                 param->setValueNotifyingHost (0.0f);
@@ -312,34 +312,34 @@ void AbcomparisonAudioProcessor::oscMessageReceived (const OSCMessage& msg)
 }
 
 
-AudioProcessorValueTreeState::ParameterLayout AbcomparisonAudioProcessor::createParameters()
+juce::AudioProcessorValueTreeState::ParameterLayout AbcomparisonAudioProcessor::createParameters()
 {
-    std::vector<std::unique_ptr<RangedAudioParameter>> params;
-    using Parameter = AudioProcessorValueTreeState::Parameter;
+    std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
+    using Parameter = juce::AudioProcessorValueTreeState::Parameter;
     params.push_back (std::make_unique<Parameter> ("switchMode", "Switch mode", "",
-                                                   NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
+                                                   juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
                                                    [](float value)  { return value < 0.5f ? "Exclusive Solo" : "Toggle Mode"; },
                                                    nullptr));
 
     params.push_back (std::make_unique<Parameter> ("numberOfChoices", "Number of choices", "choices", // has an offset of 2!
-                                                   NormalisableRange<float> (0.0f, maxNChoices - 2.0f, 1.0f), 3.0f,
-                                                   [](float value) { return String (value + 2, 0); },
+                                                    juce::NormalisableRange<float> (0.0f, maxNChoices - 2.0f, 1.0f), 3.0f,
+                                                   [](float value) { return juce::String (value + 2, 0); },
                                                    nullptr));
 
     params.push_back (std::make_unique<Parameter> ("channelSize", "Output Channel Size", "channel (s)", // has an offset of 1!
-                                                   NormalisableRange<float> (0.0f, 31.0f, 1.0f), 1.0f, // default is stereo (2 channels)
-                                                   [](float value) { return String (value + 1, 0); },
+        juce::NormalisableRange<float> (0.0f, 31.0f, 1.0f), 1.0f, // default is stereo (2 channels)
+                                                   [](float value) { return juce::String (value + 1, 0); },
                                                    nullptr));
 
     params.push_back (std::make_unique<Parameter> ("fadeTime", "Fade-Length", "ms",
-                                                   NormalisableRange<float> (0.0f, 1000.0f, 1.0f), 50.0f,
-                                                   [](float value) { return String (value); },
+        juce::NormalisableRange<float> (0.0f, 1000.0f, 1.0f), 50.0f,
+                                                   [](float value) { return juce::String (value); },
                                                    nullptr));
 
     for (int choice = 0; choice < maxNChoices; ++choice)
-        params.push_back (std::make_unique<Parameter> ("choiceState" + String (choice),
-                                                       "Choice " + String::charToString (char ('A' + choice)), "",
-                                                       NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
+        params.push_back (std::make_unique<Parameter> ("choiceState" + juce::String (choice),
+                                                       "Choice " + juce::String::charToString (char ('A' + choice)), "",
+            juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
                                                        [](float value) { return value >= 0.5f ? "ON" :  "OFF"; },
                                                        nullptr, true));
 
@@ -361,13 +361,13 @@ void AbcomparisonAudioProcessor::setEditorSize (int width, int height)
 }
 
 // This creates new instances of the plugin..
-AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new AbcomparisonAudioProcessor();
 }
 
 
-void AbcomparisonAudioProcessor::setLabelText (String newLabelText)
+void AbcomparisonAudioProcessor::setLabelText (juce::String newLabelText)
 {
     labelText = newLabelText;
     parameters.state.setProperty (LabelText, labelText, nullptr);

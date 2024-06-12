@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /** An extension to JUCE's OSCReceiver class with some useful methods.
 */
-class OSCReceiverPlus : public OSCReceiver, public ChangeBroadcaster
+class OSCReceiverPlus : public juce::OSCReceiver, public juce::ChangeBroadcaster
 {
 public:
     OSCReceiverPlus (int defaultPort = -1, bool shouldAutoConnect = false)
@@ -70,7 +70,7 @@ public:
             return true;
         }
 
-        if (! isPositiveAndBelow (port, 65536))
+        if (! juce::isPositiveAndBelow (port, 65536))
         {
             sendChangeMessage();
             return false;
